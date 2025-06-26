@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\SupplierResource\Pages;
 use App\Filament\Resources\SupplierResource\RelationManagers;
+use App\Filament\Resources\SupplierResource\RelationManagers\ProductImportsRelationManager;
 use App\Models\Supplier;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -204,7 +205,7 @@ class SupplierResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            ProductImportsRelationManager::class
         ];
     }
 

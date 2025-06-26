@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,7 +15,8 @@ class Sale extends Model
 
     public function totalPrice()
     {
-        return collect($this->items)->reduce(fn($total, $item) => $total + $item->subTotal(), 0);
+        return collect($this->items)
+            ->reduce(fn($total, $item) => $total + $item->subTotal(), 0);
     }
     public function getHasDiscountAttribute(): string
     {
@@ -23,6 +25,7 @@ class Sale extends Model
             ->where('discount_id', '!=', 1)
             ->exists();
 
+<<<<<<< HEAD
         return $hasDiscount ? 'Yes' : 'No';
     }
 
@@ -69,8 +72,13 @@ class Sale extends Model
     }
 
     public function totalItemQty()
+=======
+    protected function totalQty(): Attribute
+>>>>>>> fc9abc19883a4d43d2d6d4d549e388cbf79819c1
     {
-        return collect($this->items)->reduce(fn($totalQty, $item) => $totalQty + $item->qty, 0);
+        return Attribute::make(
+            get: fn() => $this->items->sum('qty')
+        );
     }
 
 

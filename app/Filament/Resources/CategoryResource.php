@@ -11,6 +11,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Tables\Actions\Action;
 use Maatwebsite\Excel\Facades\Excel;
@@ -81,6 +82,7 @@ class CategoryResource extends Resource
             ])
 
             ->bulkActions([
+<<<<<<< HEAD
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
@@ -97,6 +99,18 @@ class CategoryResource extends Resource
                     ->action(function (): \Symfony\Component\HttpFoundation\BinaryFileResponse {
                         return Excel::download(new CategoriesExport, 'categories.xlsx');
                     }),
+=======
+                Tables\Actions\BulkAction::make('activate')
+                    ->label('Activate Selected')
+                    ->icon('heroicon-m-check-circle')
+                    ->color('success')
+                    ->action(fn(Collection $records) => $records->each->update(['active' => true])),
+                Tables\Actions\BulkAction::make('deactivate')
+                    ->label('Deactivate Selected')
+                    ->icon('heroicon-m-x-circle')
+                    ->color('danger')
+                    ->action(fn(Collection $records) => $records->each->update(['active' => false])),
+>>>>>>> fc9abc19883a4d43d2d6d4d549e388cbf79819c1
             ]);
     }
 

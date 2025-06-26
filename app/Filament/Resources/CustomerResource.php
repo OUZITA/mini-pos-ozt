@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Enums\Gender;
 use App\Filament\Resources\CustomerResource\Pages;
 use App\Filament\Resources\CustomerResource\RelationManagers;
+use App\Filament\Resources\CustomerResource\RelationManagers\SalesRelationManager;
 use App\Models\Customer;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -19,11 +20,15 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+<<<<<<< HEAD
 use Filament\Tables\Actions\Action;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\CustomerExport;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+=======
+use Illuminate\Support\Facades\Log;
+>>>>>>> fc9abc19883a4d43d2d6d4d549e388cbf79819c1
 
 class CustomerResource extends Resource
 {
@@ -161,6 +166,7 @@ class CustomerResource extends Resource
                                 ->color('gray'),
                         ]),
                         Grid::make(4)
+<<<<<<< HEAD
                             ->schema([
                                 // TextEntry::make('total_items')
                                 //     ->label('Total Items')
@@ -190,6 +196,24 @@ class CustomerResource extends Resource
                                 //            ->color('success')
                                 //            ->icon('heroicon-o-currency-dollar'),
                             ])
+=======
+                        ->schema([
+                            // TextEntry::make('total_items')
+                            //     ->label('Total Items')
+                            //     ->state(function ($record) {
+                            //         return $record->items->sum('qty');
+                            //     })
+                            //     ->badge()
+                            //     ->color('info')
+                            //     ->icon('heroicon-o-list-bullet'),
+                            TextEntry::make('d')
+                                ->label(''),
+                            TextEntry::make('s')
+                                ->label(''),
+                            TextEntry::make('x')
+                                ->label(''),
+                        ])
+>>>>>>> fc9abc19883a4d43d2d6d4d549e388cbf79819c1
                     ]),
 
                 Section::make('Contact Details')
@@ -298,7 +322,7 @@ class CustomerResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            SalesRelationManager::class
         ];
     }
 

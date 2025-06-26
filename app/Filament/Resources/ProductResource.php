@@ -27,12 +27,16 @@ use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\Split;
 use Filament\Support\Enums\FontWeight;
+<<<<<<< HEAD
 use Filament\Tables\Actions\Action;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\productExport;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use App\Filament\Resources\Auth;
+=======
+use Filament\Tables\Columns\Layout\Split as LayoutSplit;
+>>>>>>> fc9abc19883a4d43d2d6d4d549e388cbf79819c1
 
 use function Laravel\Prompts\table;
 

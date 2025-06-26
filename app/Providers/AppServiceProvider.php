@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Http\Middleware\EnsureUserIsActive;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -15,7 +16,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
+<<<<<<< HEAD
         //$this->app->register(\App\Providers\Filament\CashierPanelProvider::class);
+=======
+>>>>>>> fc9abc19883a4d43d2d6d4d549e388cbf79819c1
     }
 
     /**

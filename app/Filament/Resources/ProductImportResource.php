@@ -56,6 +56,8 @@ class ProductImportResource extends Resource
                             ->required(),
                         Forms\Components\DatePicker::make('import_date')
                             ->label('Import Date')
+                            ->displayFormat('d/m/Y')
+                            // ->native(false)
                             ->default(now())
                             ->required(),
                         Forms\Components\RichEditor::make('note')
@@ -73,6 +75,7 @@ class ProductImportResource extends Resource
                                     ->required()
                                     ->distinct()
                                     ->disableOptionsWhenSelectedInSiblingRepeaterItems()
+<<<<<<< HEAD
                                     ->searchable()
                                     ->reactive() // 👈 important
                                     ->afterStateUpdated(function (callable $set, $state) {
@@ -81,6 +84,11 @@ class ProductImportResource extends Resource
                                     }),
 
                                 TextInput::make('qty')
+=======
+                                    ->searchable(),
+
+                                Forms\Components\TextInput::make('qty')
+>>>>>>> fc9abc19883a4d43d2d6d4d549e388cbf79819c1
                                     ->label('Quantity')
                                     ->numeric()
                                     ->default(1)
@@ -265,12 +273,23 @@ class ProductImportResource extends Resource
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
+<<<<<<< HEAD
                 Tables\Actions\EditAction::make()
                     ->visible(fn() => Filament::auth()->user()?->role !== 'cashier'),
                 Tables\Actions\DeleteAction::make()
                     ->visible(fn() => Filament::auth()->user()?->role !== 'cashier'),
+=======
+                Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make()
+                    ->before(function (ProductImport $record) {
+                        foreach ($record->items as $item) {
+                            $product = $item->product;
+                            $product->decrement('stock', $item->qty);
+                        }
+                    })
+>>>>>>> fc9abc19883a4d43d2d6d4d549e388cbf79819c1
             ])
-            ->bulkActions([
+            ->bulkActions(actions: [
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
