@@ -58,7 +58,7 @@ class ProductsRelationManager extends RelationManager
                                 ->placeholder('Select or create category'),
 
                             Forms\Components\TextInput::make('stock_security')
-                                ->label('Stock Security')
+                                ->label('Security Stock Level')
                                 ->required()
                                 ->numeric()
                                 ->minValue(1)

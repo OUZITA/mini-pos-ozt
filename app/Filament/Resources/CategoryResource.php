@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\Role;
 use App\Filament\Resources\CategoryResource\Pages;
 use App\Filament\Resources\CategoryResource\RelationManagers;
 use App\Models\Category;
@@ -11,13 +12,14 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Tables\Actions\Action;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\CategoriesExport;
+use App\Filament\Resources\CategoryResource\Pages\EditCategory;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Illuminate\Support\Facades\Auth;
 
 
 class CategoryResource extends Resource
@@ -78,13 +80,12 @@ class CategoryResource extends Resource
                     ->falseLabel('Inactive')
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()->hidden(fn() => ! EditCategory::canEdit()),
             ])
 
             ->bulkActions([
-<<<<<<< HEAD
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()->hidden(fn() => ! EditCategory::canEdit()),
                 ]),
             ])
             ->headerActions([
@@ -99,18 +100,6 @@ class CategoryResource extends Resource
                     ->action(function (): \Symfony\Component\HttpFoundation\BinaryFileResponse {
                         return Excel::download(new CategoriesExport, 'categories.xlsx');
                     }),
-=======
-                Tables\Actions\BulkAction::make('activate')
-                    ->label('Activate Selected')
-                    ->icon('heroicon-m-check-circle')
-                    ->color('success')
-                    ->action(fn(Collection $records) => $records->each->update(['active' => true])),
-                Tables\Actions\BulkAction::make('deactivate')
-                    ->label('Deactivate Selected')
-                    ->icon('heroicon-m-x-circle')
-                    ->color('danger')
-                    ->action(fn(Collection $records) => $records->each->update(['active' => false])),
->>>>>>> fc9abc19883a4d43d2d6d4d549e388cbf79819c1
             ]);
     }
 
@@ -128,5 +117,9 @@ class CategoryResource extends Resource
             'create' => Pages\CreateCategory::route('/create'),
             'edit' => Pages\EditCategory::route('/{record}/edit'),
         ];
+    }
+    public static function canCreate(): bool
+    {
+        return Auth::user()?->role !== Role::Cashier;
     }
 }

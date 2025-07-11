@@ -27,16 +27,14 @@ use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\Split;
 use Filament\Support\Enums\FontWeight;
-<<<<<<< HEAD
 use Filament\Tables\Actions\Action;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\productExport;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
-use App\Filament\Resources\Auth;
-=======
-use Filament\Tables\Columns\Layout\Split as LayoutSplit;
->>>>>>> fc9abc19883a4d43d2d6d4d549e388cbf79819c1
+use App\Enums\Role;
+use App\Filament\Resources\ProductResource\Pages\EditProduct;
+use Illuminate\Support\Facades\Auth;
 
 use function Laravel\Prompts\table;
 
@@ -49,6 +47,7 @@ class ProductResource extends Resource
     protected static ?string $recordTitleAttribute = 'name';
 
     protected static ?string $navigationGroup = 'Inventory';
+
 
     public static function form(Form $form): Form
     {
@@ -149,6 +148,7 @@ class ProductResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+
             ->columns([
                 Tables\Columns\ImageColumn::make('image')
                     ->size(60)
@@ -214,18 +214,23 @@ class ProductResource extends Resource
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+                //->hidden(fn() => ! EditProduct::canEdit()),
+                Tables\Actions\EditAction::make()
+                    ->hidden(fn() => ! EditProduct::canEdit()),
+
             ])
             ->bulkActions([
                 Tables\Actions\BulkAction::make('activate')
                     ->label('Activate Selected')
                     ->icon('heroicon-m-check-circle')
                     ->color('success')
+                    ->hidden(fn() => ! EditProduct::canEdit())
                     ->action(fn(Collection $records) => $records->each->update(['active' => true])),
                 Tables\Actions\BulkAction::make('deactivate')
                     ->label('Deactivate Selected')
                     ->icon('heroicon-m-x-circle')
                     ->color('danger')
+                    ->hidden(fn() => ! EditProduct::canEdit())
                     ->action(fn(Collection $records) => $records->each->update(['active' => false])),
             ])
             ->HeaderActions([
@@ -352,5 +357,9 @@ class ProductResource extends Resource
             'create' => Pages\CreateProduct::route('/create'),
             'edit' => Pages\EditProduct::route('/{record}/edit'),
         ];
+    }
+    public static function canCreate(): bool
+    {
+        return Auth::user()?->role !== Role::Cashier;
     }
 }

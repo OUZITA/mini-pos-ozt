@@ -15,21 +15,26 @@ class SaleStats extends BaseWidget
 
     protected static ?string $pollingInterval = null;
 
+    /**
+     * Links this widget to the ListSales page for table interactions
+     */
     protected function getTablePage(): string
     {
         return ListSales::class;
     }
 
+    /**
+     * Returns the stats displayed in the widget
+     */
     protected function getStats(): array
     {
         $today = Carbon::today();
 
-        // Sales counts
+        // === BASIC SALES STATS ===
         $totalSales = DB::table('sales')->count();
         $todaysSales = DB::table('sales')->whereDate('created_at', $today)->count();
 
-
-        // Revenue: total sale - total import
+        // === TOTAL PROFIT: revenue - import cost ===
         $saleTotal = DB::table('sales')
             ->selectRaw('SUM(total_pay) as total')
             ->value('total') ?? 0;
@@ -39,65 +44,75 @@ class SaleStats extends BaseWidget
             ->selectRaw('SUM(qty * unit_price) as total')
             ->value('total') ?? 0;
 
+        $profit = $saleTotal - $importTotal;
 
-        $Profit = $saleTotal - $importTotal;
+        // === MONTHLY COMPARISON SETUP ===
+        $now = now();
+        $startOfThisMonth = $now->copy()->startOfMonth();
+        $startOfLastMonth = $now->copy()->subMonth()->startOfMonth();
+        $endOfLastMonth = $now->copy()->subMonth()->endOfMonth();
 
-        // Monthly revenue
-        $startOfThisMonth = now()->startOfMonth();
-        $startOfLastMonth = now()->subMonth()->startOfMonth();
-        $endOfLastMonth = now()->subMonth()->endOfMonth();
+        // Sale count this vs. last month
+        $thisMonthSaleCount = DB::table('sales')->whereBetween('sale_date', [$startOfThisMonth, $now])->count();
+        $lastMonthSaleCount = DB::table('sales')->whereBetween('sale_date', [$startOfLastMonth, $endOfLastMonth])->count();
 
-        $thismonthSale = DB::table('sales')->whereBetween('sale_date', [$startOfThisMonth, now()])->count();
-        $lastmonthSale = DB::table('sales')->whereBetween('sale_date', [$startOfLastMonth, $endOfLastMonth])->count();
-
+        // Revenue this vs. last month
         $thisMonthRevenue = DB::table('sales')
-            ->whereBetween('sale_date', [$startOfThisMonth, now()])
+            ->whereBetween('sale_date', [$startOfThisMonth, $now])
             ->selectRaw('SUM(total_pay) as total')
             ->value('total') ?? 0;
 
         $lastMonthRevenue = DB::table('sales')
-
             ->whereBetween('sale_date', [$startOfLastMonth, $endOfLastMonth])
             ->selectRaw('SUM(total_pay) as total')
             ->value('total') ?? 0;
 
-        $diff = $thisMonthRevenue - $lastMonthRevenue;
-        $diffsale = $thismonthSale - $lastmonthSale;
+        // === REVENUE COMPARISON DESCRIPTION ===
+        $revenueDiff = $thisMonthRevenue - $lastMonthRevenue;
         $description = 'No data from last month';
         $descriptionColor = 'gray';
+
         if ($lastMonthRevenue > 0) {
-            $prefix = $diff >= 0 ? '+' : '-';
-            $percent = number_format(abs($diff / $lastMonthRevenue * 100), 1);
-            $amount = number_format(abs($diff), 2);
-            $description = "{$prefix}$$amount  ({$percent}%)  from last month";
-            $descriptionColor = $diff >= 0 ? 'success' : 'danger';
+            $prefix = $revenueDiff >= 0 ? '+' : '-';
+            $percent = number_format(abs($revenueDiff / $lastMonthRevenue * 100), 1);
+            $amount = number_format(abs($revenueDiff), 2);
+            $description = "{$prefix}$$amount ({$percent}%) than last month";
+            $descriptionColor = $revenueDiff >= 0 ? 'success' : 'danger';
         }
-        if ($lastmonthSale > 0) {
-            $amount = number_format(abs($diffsale), 0);
-            $descriptionsale = $diffsale >= 0 ? " $amount  more sale from last month" : "need $amount sale to even";
-            $descriptionColor = $diffsale >= 0 ? 'success' : 'danger';
+
+        // === SALE COUNT COMPARISON DESCRIPTION ===
+        $saleDiff = $thisMonthSaleCount - $lastMonthSaleCount;
+        $descriptionsale = 'No data from last month';
+
+        if ($lastMonthSaleCount > 0) {
+            $amount = number_format(abs($saleDiff), 0);
+            $descriptionsale = $saleDiff >= 0
+                ? "$amount more sale than last month"
+                : "Need $amount sale to even";
         }
 
         return [
-            Stat::make('This month Sales', $thismonthSale)
+
+            // Monthly Sales Stat Box
+            Stat::make('This Month Sales', $thisMonthSaleCount)
                 ->chart([27, 27])
-                ->color($thismonthSale >= 0 ? 'success' : 'danger')
+                ->color($saleDiff >= 0 ? 'success' : 'danger')
                 ->description($descriptionsale),
 
-
-            Stat::make('Total Profit', '$' . number_format($Profit, 2))
-                ->color($Profit >= 0 ? 'success,' : 'danger')
+            // Profit Box
+            Stat::make('Total Profit', '$' . number_format($profit, 2))
+                ->color($profit >= 0 ? 'success' : 'danger')
                 ->icon('heroicon-o-currency-dollar')
                 ->chart([27, 27]),
 
+            // Revenue Box
             Stat::make('This Month Revenue', '$' . number_format($thisMonthRevenue, 2))
-                ->color($thisMonthRevenue >= 0 ? 'success' : 'danger')
+                ->color($thisMonthRevenue >= $lastMonthRevenue ? 'success' : 'danger')
                 ->icon('heroicon-o-currency-dollar')
-                ->descriptionIcon($diff >= 0 ? 'heroicon-m-arrow-trending-up' : 'heroicon-m-arrow-trending-down')
+                ->descriptionIcon($revenueDiff >= 0 ? 'heroicon-m-arrow-trending-up' : 'heroicon-m-arrow-trending-down')
                 ->chart([27, 27])
                 ->description($description)
                 ->descriptionColor($descriptionColor),
-
         ];
     }
 }

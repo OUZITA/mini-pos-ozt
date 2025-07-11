@@ -10,35 +10,38 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 class ProductStats extends BaseWidget
 {
     use InteractsWithPageTable;
-
+    // Disable polling (manual refresh only)
     protected static ?string $pollingInterval = null;
 
+    /**
+     * Define which page this widget is tied to
+     */
     protected function getTablePage(): string
     {
         return ListProducts::class;
     }
 
+    /**
+     * Return array of stats to display
+     */
     protected function getStats(): array
     {
-        return [
-<<<<<<< HEAD
-            Stat::make('Total Unique Products', $this->getPageTableQuery()->count())->chart([27, 27])
-                ->color('info'),
-=======
-            Stat::make('Total Products', $this->getPageTableQuery()->where('active', true)->count())
-                ->description('32k increase')
-                ->descriptionIcon('heroicon-m-arrow-trending-up')
-                ->color('success')
-                ->chart([7, 2, 10, 3, 15, 4, 17])
-                ->extraAttributes([
-                    'class' => 'cursor-pointer',
-                    'wire:click' => "\$dispatch('setStatusFilter', { filter: 'processed' })",
-                ]),
->>>>>>> fc9abc19883a4d43d2d6d4d549e388cbf79819c1
+        $query = $this->getPageTableQuery();
 
-            Stat::make('Product Inventory', $this->getPageTableQuery()->sum('stock'))->chart([27, 27])
+        return [
+            // Total number of unique products
+            Stat::make('Total Unique Products', $query->count())
+                ->chart([27, 27])
                 ->color('info'),
-            Stat::make('Average Price', '$ ' . number_format($this->getPageTableQuery()->avg('price'), 2))->chart([27, 27])
+
+            // Total inventory stock (sum of all product stock values)
+            Stat::make('Product Inventory', $query->sum('stock'))
+                ->chart([27, 27])
+                ->color('info'),
+
+            // Average price, formatted as USD with 2 decimals
+            Stat::make('Average Price', '$ ' . number_format($query->avg('price'), 2))
+                ->chart([27, 27])
                 ->color('info'),
         ];
     }

@@ -5,39 +5,43 @@ namespace App\Filament\Resources\SaleResource\Pages;
 use App\Filament\Resources\SaleResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class EditSale extends EditRecord
 {
     protected static string $resource = SaleResource::class;
 
-    protected function mutateFormDataBeforeFill(array $data): array
+    /**
+     * Hook before saving the record
+     */
+    protected function beforeSave(): void
     {
-        Log::info('Sale Items:', [
-            'sale_id' => $this->record->id,
-            'items' => $this->record->items()->get()
-        ]);
-
-        return $data;
+        // Optional debug log of current record before save
+        Log::info('Before save Sale record:', ['record' => $this->record]);
     }
 
-
-    protected function beforeSave()
+    /**
+     * After saving:
+     * - Recalculate total_pay
+     * - Reload related items and discounts
+     * - Save updated total
+     */
+    protected function afterSave(): void
     {
-        Log::info($this->record);
-    }
-
-    protected function afterSave()
-    {
+        // Ensure all related data is loaded
         $this->record->load('items.discount');
 
+        // Recalculate and update total
         $this->record->total_pay = $this->record->totalPay();
-        $this->record->save(); // save updated total_pay
+        $this->record->save();
 
-        //Log::info('Updated total_pay:', ['total_pay' => $this->record->total_pay]);
+        // Log optional debug info
+        // Log::info('Updated total_pay:', ['total_pay' => $this->record->total_pay]);
     }
 
+    /**
+     * Define available actions in the header (e.g., Delete button)
+     */
     protected function getHeaderActions(): array
     {
         return [

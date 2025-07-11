@@ -7,17 +7,10 @@ use App\Filament\Resources\UserResource\Pages;
 use App\Filament\Resources\UserResource\RelationManagers;
 use App\Helpers\Util;
 use App\Models\User;
-use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Support\Enums\Alignment;
-use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
-use Filament\Tables\Columns\Layout\Panel;
-use Filament\Tables\Columns\Layout\Split;
-use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Table;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Database\Eloquent\Builder;
@@ -25,8 +18,10 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Log;
 use App\Filament\Resources\FontWeight;
+use App\Filament\Resources\UserResource\Pages\EditUser;
 use Filament\Support\Enums\FontWeight as EnumsFontWeight;
 use Filament\Tables\Columns\Layout\Stack;
+use Illuminate\Support\Facades\Auth;
 
 class UserResource extends Resource
 {
@@ -77,11 +72,7 @@ class UserResource extends Resource
                         ->circular(),
                     Tables\Columns\TextColumn::make('name')
                         ->searchable()
-<<<<<<< HEAD
                         ->weight(EnumsFontWeight::Bold)
-=======
-                        ->weight(FontWeight::Bold)
->>>>>>> fc9abc19883a4d43d2d6d4d549e388cbf79819c1
                         ->formatStateUsing(fn($record) => $record->name . ' (' . $record->role->name . ')'),
                     Tables\Columns\TextColumn::make('email'),
                     Tables\Columns\IconColumn::make('active')
@@ -96,12 +87,14 @@ class UserResource extends Resource
                     ->label('Activate')
                     ->icon('heroicon-m-check-circle')
                     ->color('success')
+                    ->hidden(fn() => ! EditUser::canEdit())
                     ->action(fn(User $record) => $record->update(['active' => true])),
                 Tables\Actions\Action::make('deactivate')
                     ->button()
                     ->label('Deactivate')
                     ->icon('heroicon-m-x-circle')
                     ->color('danger')
+                    ->hidden(fn() => ! Edituser::canEdit())
                     ->action(fn(User $record) => $record->update(['active' => false])),
             ])
             ->bulkActions([
@@ -110,6 +103,7 @@ class UserResource extends Resource
                     ->label('Activate')
                     ->icon('heroicon-m-check-circle')
                     ->color('success')
+                    ->hidden(fn() => ! Edituser::canEdit())
                     ->action(fn(Collection $records) => $records->each->update(['active' => true])),
             ])
             ->contentGrid(
@@ -120,78 +114,6 @@ class UserResource extends Resource
             );
     }
 
-<<<<<<< HEAD
-=======
-    // public static function table(Table $table): Table
-    // {
-    //     return $table
-    //         ->columns([
-    //             Split::make([
-    //                 Stack::make([
-    //                     Tables\Columns\ImageColumn::make('avatar_url')
-    //                         ->defaultImageUrl(fn(User $record) => User::getDefaultAvatar($record->name))
-    //                         ->label('Avatar')
-    //                         ->circular(),
-    //                     Tables\Columns\TextColumn::make('name')
-    //                         ->weight(FontWeight::Bold)
-    //                         ->sortable()
-    //                         ->searchable(),
-    //                 ])->alignment(Alignment::Center)
-    //                     ->space(2),
-
-    //                 Tables\Columns\IconColumn::make('active')
-    //                     ->boolean(),
-    //                 Tables\Columns\TextColumn::make('created_at')
-    //                     ->dateTime('d/m/y h:m:s')
-    //                     ->sortable()
-    //                     ->toggleable(isToggledHiddenByDefault: true),
-    //                 Tables\Columns\TextColumn::make('updated_at')
-    //                     ->dateTime()
-    //                     ->sortable()
-    //                     ->toggleable(isToggledHiddenByDefault: true),
-    //             ])
-    //                 ->visibleFrom('md'),
-    //             Panel::make([
-    //                 Tables\Columns\TextColumn::make('email')
-    //                     ->searchable(),
-    //                 Tables\Columns\TextColumn::make('role')
-    //                     ->badge()
-    //                     ->color(function ($state) {
-    //                         return $state->getColor();
-    //                     }),
-    //             ])->collapsible(false)
-    //         ])
-    //         ->filters([
-    //             Tables\Filters\SelectFilter::make('role')
-    //                 ->options(Role::class),
-    //             Tables\Filters\TernaryFilter::make('active')
-    //                 ->label('Status')
-    //                 ->placeholder('All Users')
-    //                 ->trueLabel('Active Users')
-    //                 ->falseLabel('Inactive Users'),
-    //         ])
-    //         ->actions([
-    //             Tables\Actions\Action::make('edit')
-    //                 ->url(fn($record) => UserResource::getUrl('edit', ['record' => $record]))
-    //                 ->icon('heroicon-m-pencil-square')
-    //         ])
-    //         ->bulkActions([
-    //             Tables\Actions\BulkAction::make('activate')
-    //                 ->requiresConfirmation()
-    //                 ->label('Activate Selected')
-    //                 ->icon('heroicon-m-check-circle')
-    //                 ->color('success')
-    //                 ->action(fn(Collection $records) => $records->each->update(['active' => true])),
-    //             Tables\Actions\BulkAction::make('deactivate')
-    //                 ->requiresConfirmation()
-    //                 ->label('Deactivate Selected')
-    //                 ->icon('heroicon-m-x-circle')
-    //                 ->color('danger')
-    //                 ->action(fn(Collection $records) => $records->each->update(['active' => false])),
-    //         ])
-    //         ->defaultSort('active', 'desc');
-    // }
->>>>>>> fc9abc19883a4d43d2d6d4d549e388cbf79819c1
 
     public static function getRelations(): array
     {
@@ -207,5 +129,9 @@ class UserResource extends Resource
             'create' => Pages\CreateUser::route('/create'),
             'edit' => Pages\EditUser::route('/{record}/edit'),
         ];
+    }
+    public static function canCreate(): bool
+    {
+        return Auth::user()?->role !== Role::Cashier;
     }
 }

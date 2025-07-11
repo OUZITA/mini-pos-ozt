@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\Role;
 use App\Filament\Resources\SupplierResource\Pages;
 use App\Filament\Resources\SupplierResource\RelationManagers;
-use App\Filament\Resources\SupplierResource\RelationManagers\ProductImportsRelationManager;
 use App\Models\Supplier;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -22,6 +22,8 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Tables\Actions\Action;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\SupplierExport;
+use App\Filament\Resources\SupplierResource\Pages\EditSupplier;
+use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
@@ -94,7 +96,7 @@ class SupplierResource extends Resource
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()->hidden(fn() => ! EditSupplier::canEdit()),
             ])
             ->bulkActions([
                 Tables\Actions\BulkAction::make('activate')
@@ -205,7 +207,7 @@ class SupplierResource extends Resource
     public static function getRelations(): array
     {
         return [
-            ProductImportsRelationManager::class
+            //
         ];
     }
 
@@ -217,5 +219,9 @@ class SupplierResource extends Resource
             'supplier.view' => Pages\ViewSupplier::route(path: '/{record}'),
             'edit' => Pages\EditSupplier::route('/{record}/edit'),
         ];
+    }
+    public static function canCreate(): bool
+    {
+        return Auth::user()?->role !== Role::Cashier;
     }
 }

@@ -29,6 +29,7 @@ use Filament\Facades\Filament;
 
 
 use App\Exports\ProductImportItemsExport;
+use App\Filament\Resources\ProductImportResource\Pages\EditProductImport;
 use Maatwebsite\Excel\Facades\Excel;
 use Filament\Forms\Components\Select;
 
@@ -56,8 +57,6 @@ class ProductImportResource extends Resource
                             ->required(),
                         Forms\Components\DatePicker::make('import_date')
                             ->label('Import Date')
-                            ->displayFormat('d/m/Y')
-                            // ->native(false)
                             ->default(now())
                             ->required(),
                         Forms\Components\RichEditor::make('note')
@@ -75,20 +74,14 @@ class ProductImportResource extends Resource
                                     ->required()
                                     ->distinct()
                                     ->disableOptionsWhenSelectedInSiblingRepeaterItems()
-<<<<<<< HEAD
                                     ->searchable()
-                                    ->reactive() // 👈 important
+                                    ->reactive()
                                     ->afterStateUpdated(function (callable $set, $state) {
                                         $price = \App\Models\Product::find($state)?->price ?? 0;
                                         $set('product_price', $price);
                                     }),
 
                                 TextInput::make('qty')
-=======
-                                    ->searchable(),
-
-                                Forms\Components\TextInput::make('qty')
->>>>>>> fc9abc19883a4d43d2d6d4d549e388cbf79819c1
                                     ->label('Quantity')
                                     ->numeric()
                                     ->default(1)
@@ -103,7 +96,7 @@ class ProductImportResource extends Resource
                                 TextInput::make('product_price')
                                     ->label('Current Price')
                                     ->disabled()
-                                    ->dehydrated(false) // 👈 prevents it from being saved to DB
+                                    ->dehydrated(false) // prevents it from being saved to DB
                                     ->prefix('$')
                             ])
                             ->columns(4)
@@ -200,14 +193,6 @@ class ProductImportResource extends Resource
 
                         Grid::make(4)
                             ->schema([
-                                // TextEntry::make('total_items')
-                                //     ->label('Total Items')
-                                //     ->state(function ($record) {
-                                //         return $record->items->sum('qty');
-                                //     })
-                                //     ->badge()
-                                //     ->color('info')
-                                //     ->icon('heroicon-o-list-bullet'),
                                 TextEntry::make('d')
                                     ->label(''),
                                 TextEntry::make('s')
@@ -273,25 +258,14 @@ class ProductImportResource extends Resource
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
-<<<<<<< HEAD
                 Tables\Actions\EditAction::make()
-                    ->visible(fn() => Filament::auth()->user()?->role !== 'cashier'),
+                    ->hidden(fn() => ! EditProductImport::canEdit()),
                 Tables\Actions\DeleteAction::make()
-                    ->visible(fn() => Filament::auth()->user()?->role !== 'cashier'),
-=======
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make()
-                    ->before(function (ProductImport $record) {
-                        foreach ($record->items as $item) {
-                            $product = $item->product;
-                            $product->decrement('stock', $item->qty);
-                        }
-                    })
->>>>>>> fc9abc19883a4d43d2d6d4d549e388cbf79819c1
+                    ->hidden(fn() => ! EditProductImport::canEdit()),
             ])
-            ->bulkActions(actions: [
+            ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()->hidden(fn() => ! EditProductImport::canEdit()),
                 ]),
             ])
             ->HeaderActions([

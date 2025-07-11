@@ -26,7 +26,7 @@
                 border: 1px solid #ffffff;
             }
 
-            h1 {
+            h2 {
                 font-size: 1.5em;
                 text-align: left;
                 margin-bottom: 2px;
@@ -118,9 +118,12 @@
 
 <body onload="window.print()">
     <div class="receipt">
+        <div style="text-align: center;">
+            <h1 text-align: center;>Invoice</h1>
+        </div>
         <div style="display: flex; align-items: center; justify-content: space-between;">
             <img src="{{ public_path('images/tlgold.png') }}" alt="Logo" width="150" align="right">
-            <h1 style="margin: 0;">TL Gold Computer Invoice</h1>
+            <h2 style="margin: 0;">TL Gold Computer</h2>
         </div>
 
         <table class="receipt-details", style="width: 70%; margin-top: 20px; border-collapse: collapse; border: none;">
@@ -145,9 +148,9 @@
                     <th>Name</th>
                     <th>Description</th>
                     <th>Quantity</th>
-                    <th>Unit Price</th>
+                    <th style="white-space: nowrap;">Unit Price</th>
                     <th>Discount</th>
-                    <th>Amount</th>
+                    <th>Total</th>
                 </tr>
             </thead>
             <tbody class="receipt-details-table">
@@ -163,7 +166,7 @@
                         <td>{!! $item->product->description ?? '-' !!}</td>
                         <td>{{ $item->qty }}</td>
                         <td>${{ number_format($item->unit_price, 2) }}</td>
-                        <td>${{ number_format($item->discount_amount, 2) }}</td>
+                        <td>${{ number_format($item->qty > 0 ? $item->discount_amount / $item->qty : 0, 2) }}</td>
                         <td>${{ number_format($item->subTotal() - $item->discount_amount, 2) }}</td>
                     </tr>
                 @endforeach

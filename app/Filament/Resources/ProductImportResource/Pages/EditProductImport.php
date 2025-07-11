@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\ProductImportResource\Pages;
 
+use App\Enums\Role;
 use App\Filament\Resources\ProductImportResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
@@ -17,15 +18,8 @@ class EditProductImport extends EditRecord
             Actions\DeleteAction::make(),
         ];
     }
-
-    protected function mutateFormDataBeforeFill(array $data): array
+    public static function CanEdit(): bool
     {
-        logger('Current Items', [$this->record->items()->get()]);
-        return $data;
-    }
-
-    protected function afterSave()
-    {
-        logger('Edit Product Import', [$this->record['items']]);
+        return Auth::user()?->role !== Role::Cashier;
     }
 }

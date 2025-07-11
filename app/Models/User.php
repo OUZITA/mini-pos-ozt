@@ -82,13 +82,19 @@ class User extends Authenticatable implements HasAvatar, FilamentUser
         return $this->hasMany(Sale::class);
     }
 
-    //php artisan vendor:publish --tag=filament-config
-    /*public function canAccessPanel(Panel $panel): bool
+
+    public function getRoleEnum(): ?Role
     {
-        return match ($panel->getId()) {
-            'admin' => $this->role === Role::Admin,
-            'cashier' => $this->role === Role::Cashier,
-            default => false,
-        };
-    }*/
+        if (!isset($this->role)) {
+            return null;
+        }
+
+        // If it's already a Role enum, return it directly
+        if ($this->role instanceof Role) {
+            return $this->role;
+        }
+
+        // Otherwise, convert string to enum
+        return Role::from($this->role);
+    }
 }

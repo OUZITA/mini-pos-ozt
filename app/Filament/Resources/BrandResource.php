@@ -2,7 +2,9 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\Role;
 use App\Filament\Resources\BrandResource\Pages;
+use App\Filament\Resources\BrandResource\Pages\EditBrand;
 use App\Filament\Resources\BrandResource\RelationManagers;
 use App\Filament\Resources\BrandResource\RelationManagers\ProductsRelationManager;
 use App\Helpers\Util;
@@ -20,6 +22,7 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Log;
 use Parfaitementweb\FilamentCountryField\Forms\Components\Country;
 use Parfaitementweb\FilamentCountryField\Tables\Columns\CountryColumn;
+use Illuminate\Support\Facades\Auth;
 
 class BrandResource extends Resource
 {
@@ -119,13 +122,14 @@ class BrandResource extends Resource
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()->hidden(fn() => ! EditBrand::canEdit()),
             ])
             ->bulkActions([
                 Tables\Actions\BulkAction::make('activate')
                     ->label('Activate Selected')
                     ->icon('heroicon-m-check-circle')
                     ->color('success')
+                    ->hidden(fn() => ! EditBrand::canEdit())
                     ->action(fn(Collection $records) => $records->each->update(['active' => true])),
                 Tables\Actions\BulkAction::make('deactivate')
                     ->label('Deactivate Selected')
@@ -224,5 +228,9 @@ class BrandResource extends Resource
             'create' => Pages\CreateBrand::route('/create'),
             'edit' => Pages\EditBrand::route('/{record}/edit'),
         ];
+    }
+    public static function canCreate(): bool
+    {
+        return Auth::user()?->role !== Role::Cashier;
     }
 }

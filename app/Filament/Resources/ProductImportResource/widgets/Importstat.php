@@ -21,10 +21,13 @@ class Importstats extends BaseWidget
 
     protected function getStats(): array
     {
+        // Calculate total import cost 
         $importcost = DB::table('product_import_items')
             ->join('product_imports', 'product_import_items.product_import_id', '=', 'product_imports.id')
             ->selectRaw('SUM(product_import_items.qty * product_import_items.unit_price) as total')
             ->value('total') ?? 0;
+
+        // Calculate total number of items imported
         $importitem = DB::table('product_import_items')
             ->join('product_imports', 'product_import_items.product_import_id', '=', 'product_imports.id')
             ->selectRaw('SUM(product_import_items.qty ) as total')
@@ -37,6 +40,7 @@ class Importstats extends BaseWidget
             Stat::make('Total Import Cost', '$' . number_format($importcost, 2))
                 ->chart([27, 27])
                 ->color('info'),
+
             Stat::make('Total import items', $importitem)
                 ->chart([27, 27])
                 ->color('info'),

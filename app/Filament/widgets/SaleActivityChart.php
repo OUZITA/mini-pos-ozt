@@ -3,7 +3,6 @@
 namespace App\Filament\Widgets;
 
 use App\Models\Sale;
-use App\Models\SaleItem;
 use Filament\Widgets\ChartWidget;
 use Flowframe\Trend\Trend;
 
@@ -11,6 +10,19 @@ class SaleActivityChart extends ChartWidget
 {
     protected static ?string $heading = 'Sale activities over the last 30 days';
 
+    protected function getOptions(): array
+    {
+        return [
+            'ticks' => [
+                'precision' => 0,
+            ],
+            'plugins' => [
+                'legend' => [
+                    'display' => false, // Hide legend (since label is not dynamic)
+                ],
+            ],
+        ];
+    }
 
     protected function getData(): array
     {
@@ -36,12 +48,12 @@ class SaleActivityChart extends ChartWidget
                     'tension' => 0.4,
                     'fill' => true,
                     'backgroundColor' => 'rgba(59, 130, 246, 0.1)', // Light blue background
-                    'borderColor' => 'rgba(28, 244, 49, 0.82)', // Blue border
-                    'pointBackgroundColor' => 'rgba(28, 244, 49, 0.82)',
+                    'borderColor' => '#22c55e', // Blue border
+                    'pointBackgroundColor' => '#22c55e',
                     'borderWidth' => 2,
                     'pointRadius' => 4,
                     'pointHoverRadius' => 6,
-                    'pointBorderColor' => 'rgba(28, 244, 49, 0.82)',
+                    'pointBorderColor' => '#22c55e',
                 ]
             ],
             'labels' => $data->map(fn($value) => date('M j', strtotime($value->date))),

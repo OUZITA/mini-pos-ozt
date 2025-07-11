@@ -49,6 +49,10 @@ class LatestSale extends BaseWidget
                     ->sortable()
                     ->badge()
                     ->color('success'),
+                Tables\Columns\TextColumn::make('user.name')
+                    ->label('Sold By')
+                    ->sortable()
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('total_pay')
                     ->money(currency: 'usd')
                     ->getStateUsing(fn(Sale $record) => $record->totalPay())
@@ -64,9 +68,7 @@ class LatestSale extends BaseWidget
                     ->url(
                         fn(Sale $record) => SaleResource::getUrl('view2', ['record' => $record])
                     )
-                    ->openUrlInNewTab(),
-                //Tables\Actions\Action::make('open')
-                //   ->url(fn(Sale $record): string => SaleResource::getUrl('edit', ['record' => $record])),
+                // ->openUrlInNewTab(),
             ]);
     }
 }

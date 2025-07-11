@@ -2,13 +2,16 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\Role;
 use Filament\Forms;
 use Filament\Tables;
 use App\Filament\Resources\DiscountResource\Pages;
+use App\Filament\Resources\DiscountResource\Pages\EditDiscount;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
 use App\Models\Discount;
 use Filament\Resources\Resource;
+use Illuminate\Support\Facades\Auth;
 
 class DiscountResource extends Resource
 {
@@ -48,23 +51,23 @@ class DiscountResource extends Resource
                 ->label('Value'),
 
             Tables\Columns\IconColumn::make('ispercent')
-                ->label('%?')
+                ->label('is % ?')
                 ->boolean(),
 
             Tables\Columns\IconColumn::make('active')
                 ->label('Active')
                 ->boolean(),
 
-            Tables\Columns\TextColumn::make('created_at')->dateTime()->since(),
+            //Tables\Columns\TextColumn::make('created_at')->dateTime()->since(),
         ])
             ->filters([
                 Tables\Filters\TernaryFilter::make('active'),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()->hidden(fn() => ! EditDiscount::canEdit()),
             ])
             ->bulkActions([
-                Tables\Actions\DeleteBulkAction::make(),
+                Tables\Actions\DeleteBulkAction::make()->hidden(fn() => ! EditDiscount::canEdit()),
             ]);
     }
 
@@ -75,5 +78,9 @@ class DiscountResource extends Resource
             'create' => Pages\CreateDiscount::route('/create'),
             'edit' => Pages\EditDiscount::route('/{record}/edit'),
         ];
+    }
+    public static function canCreate(): bool
+    {
+        return Auth::user()?->role !== Role::Cashier;
     }
 }
